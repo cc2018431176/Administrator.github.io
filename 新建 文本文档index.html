@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>手机号注册登录</title>
+  <title>诗意空间 - 登录与个人中心</title>
   <!-- 引入Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- 引入Font Awesome -->
@@ -14,7 +14,12 @@
       theme: {
         extend: {
           colors: {
-            primary: '#165DFF',
+            primary: '#3B82F6',
+            secondary: '#6366F1',
+            accent: '#EC4899',
+          },
+          fontFamily: {
+            poetry: ['"Noto Serif SC"', 'serif'],
           },
         },
       }
@@ -29,115 +34,238 @@
       .input-focus {
         @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
       }
+      .text-shadow {
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+      }
+      .transition-smooth {
+        transition: all 0.3s ease-in-out;
+      }
     }
   </style>
+  
+  <!-- 引入诗歌字体 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-  <!-- 主容器 -->
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden">
-    <!-- 标题切换区 -->
-    <div class="flex border-b">
-      <button id="login-tab" class="flex-1 py-4 text-center font-medium text-primary border-b-2 border-primary">
-        登录
-      </button>
-      <button id="register-tab" class="flex-1 py-4 text-center font-medium text-gray-500 hover:text-gray-700">
-        注册
-      </button>
-    </div>
-    
-    <!-- 登录表单 -->
-    <div id="login-form" class="p-6">
-      <div class="mb-4">
-        <label for="login-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-            <i class="fa fa-phone"></i>
-          </span>
-          <input type="tel" id="login-phone" 
-                 class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
-                 placeholder="请输入手机号" maxlength="11">
-        </div>
-        <p id="login-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
+<body class="bg-gray-50 min-h-screen font-sans">
+  <!-- 导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <!-- 网站标题 -->
+        <a href="#" class="text-xl font-bold text-primary flex items-center">
+          <i class="fa fa-book mr-2"></i>
+          <span>诗意空间</span>
+        </a>
+        
+        <!-- 个人空间入口 (登录后显示) -->
+        <a id="profile-link" href="#" class="hidden text-gray-700 hover:text-primary transition-colors font-medium">
+          <i class="fa fa-user-circle mr-1"></i>个人空间
+        </a>
       </div>
       
-      <div class="mb-6">
-        <label for="login-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-            <i class="fa fa-shield"></i>
-          </span>
-          <input type="text" id="login-code" 
-                 class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
-                 placeholder="请输入验证码" maxlength="6">
-          <button id="login-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
-            获取验证码
-          </button>
+      <div class="flex items-center">
+        <!-- 用户头像 (登录后显示) -->
+        <div id="user-avatar-container" class="hidden mr-3">
+          <img id="user-avatar" src="https://picsum.photos/id/64/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
         </div>
-        <p id="login-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
-      </div>
-      
-      <button id="login-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
-        登录
-      </button>
-      
-      <div class="mt-4 text-center text-sm text-gray-500">
-        登录即表示同意<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a>
+        
+        <!-- 登录/退出按钮 -->
+        <button id="auth-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
+          登录
+        </button>
       </div>
     </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8 min-h-[calc(100vh-130px)]">
+    <!-- 未登录状态 - 显示登录表单 -->
+    <div id="login-section" class="max-w-md mx-auto">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <!-- 标题切换区 -->
+        <div class="flex border-b">
+          <button id="login-tab" class="flex-1 py-4 text-center font-medium text-primary border-b-2 border-primary">
+            登录
+          </button>
+          <button id="register-tab" class="flex-1 py-4 text-center font-medium text-gray-500 hover:text-gray-700">
+            注册
+          </button>
+        </div>
+        
+        <!-- 登录表单 -->
+        <div id="login-form" class="p-6">
+          <div class="mb-4">
+            <label for="login-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="fa fa-phone"></i>
+              </span>
+              <input type="tel" id="login-phone" 
+                     class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
+                     placeholder="请输入手机号" maxlength="11">
+            </div>
+            <p id="login-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
+          </div>
+          
+          <div class="mb-6">
+            <label for="login-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="fa fa-shield"></i>
+              </span>
+              <input type="text" id="login-code" 
+                     class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
+                     placeholder="请输入验证码" maxlength="6">
+              <button id="login-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
+                获取验证码
+              </button>
+            </div>
+            <p id="login-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
+          </div>
+          
+          <button id="login-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+            登录
+          </button>
+        </div>
+        
+        <!-- 注册表单 (默认隐藏) -->
+        <div id="register-form" class="p-6 hidden">
+          <div class="mb-4">
+            <label for="register-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="fa fa-phone"></i>
+              </span>
+              <input type="tel" id="register-phone" 
+                     class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
+                     placeholder="请输入手机号" maxlength="11">
+            </div>
+            <p id="register-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
+          </div>
+          
+          <div class="mb-4">
+            <label for="register-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="fa fa-shield"></i>
+              </span>
+              <input type="text" id="register-code" 
+                     class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
+                     placeholder="请输入验证码" maxlength="6">
+              <button id="register-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
+                获取验证码
+              </button>
+            </div>
+            <p id="register-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
+          </div>
+          
+          <div class="mb-6">
+            <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">设置密码</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="fa fa-lock"></i>
+              </span>
+              <input type="password" id="register-password" 
+                     class="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 input-focus"
+                     placeholder="请设置6-16位密码">
+              <button id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <i class="fa fa-eye-slash"></i>
+              </button>
+            </div>
+            <p id="register-password-error" class="mt-1 text-sm text-red-500 hidden">请设置6-16位密码</p>
+          </div>
+          
+          <button id="register-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+            注册
+          </button>
+        </div>
+      </div>
+    </div>
     
-    <!-- 注册表单 (默认隐藏) -->
-    <div id="register-form" class="p-6 hidden">
-      <div class="mb-4">
-        <label for="register-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-            <i class="fa fa-phone"></i>
-          </span>
-          <input type="tel" id="register-phone" 
-                 class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
-                 placeholder="请输入手机号" maxlength="11">
+    <!-- 登录后状态 - 显示诗歌和主内容 (默认隐藏) -->
+    <div id="poetry-section" class="hidden">
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-10">
+        <h2 class="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">每日一诗</h2>
+        
+        <div class="font-poetry text-center">
+          <h3 class="text-2xl md:text-3xl font-bold text-primary mb-4">静夜思</h3>
+          <p class="text-gray-600 mb-6">【唐】李白</p>
+          
+          <div class="text-xl md:text-2xl leading-loose text-gray-700 space-y-4 my-8">
+            <p>床前明月光，</p>
+            <p>疑是地上霜。</p>
+            <p>举头望明月，</p>
+            <p>低头思故乡。</p>
+          </div>
+          
+          <div class="text-gray-600 text-sm italic mt-8 pt-4 border-t border-gray-100">
+            <p>这首脍炙人口的小诗，用平淡的语言道出了浓浓的思乡之情，</p>
+            <p>成为了千古传诵的佳作。</p>
+          </div>
         </div>
-        <p id="register-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
       </div>
       
-      <div class="mb-4">
-        <label for="register-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-            <i class="fa fa-shield"></i>
-          </span>
-          <input type="text" id="register-code" 
-                 class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
-                 placeholder="请输入验证码" maxlength="6">
-          <button id="register-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
-            获取验证码
+      <div class="text-center text-gray-500">
+        <p>登录成功，欢迎来到诗意空间</p>
+        <p class="mt-2">每天一首好诗，滋养心灵</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-white py-6">
+    <div class="container mx-auto px-4 text-center">
+      <p>© 2023 诗意空间 - 用诗歌点亮生活</p>
+    </div>
+  </footer>
+
+  <!-- 个人空间模态框 (默认隐藏) -->
+  <div id="profile-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-smooth">
+      <div class="p-6 border-b">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xl font-bold text-gray-800">个人空间</h3>
+          <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+            <i class="fa fa-times text-xl"></i>
           </button>
         </div>
-        <p id="register-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
       </div>
       
-      <div class="mb-6">
-        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">设置密码</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-            <i class="fa fa-lock"></i>
-          </span>
-          <input type="password" id="register-password" 
-                 class="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 input-focus"
-                 placeholder="请设置6-16位密码">
-          <button id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-            <i class="fa fa-eye-slash"></i>
-          </button>
+      <div class="p-6">
+        <!-- 头像设置 -->
+        <div class="text-center mb-8">
+          <div class="relative mx-auto w-32 h-32 mb-4">
+            <img id="profile-avatar" src="https://picsum.photos/id/64/100/100" alt="个人头像" class="w-full h-full rounded-full object-cover border-4 border-primary/20">
+            
+            <!-- 更换头像按钮 -->
+            <label for="avatar-upload" class="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors shadow-md">
+              <i class="fa fa-camera"></i>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+          </div>
+          
+          <h4 id="user-phone" class="font-medium text-gray-800">138****6789</h4>
+          <p class="text-gray-500 text-sm mt-1">点击头像可更换</p>
         </div>
-        <p id="register-password-error" class="mt-1 text-sm text-red-500 hidden">请设置6-16位密码</p>
+        
+        <!-- 其他个人信息 -->
+        <div class="space-y-4">
+          <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <span class="text-gray-600">账号状态</span>
+            <span class="text-green-600"><i class="fa fa-check-circle mr-1"></i>已认证</span>
+          </div>
+          
+          <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <span class="text-gray-600">注册时间</span>
+            <span class="text-gray-700">2023-05-15</span>
+          </div>
+        </div>
       </div>
       
-      <button id="register-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
-        注册
-      </button>
-      
-      <div class="mt-4 text-center text-sm text-gray-500">
-        注册即表示同意<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a>
+      <div class="p-6 border-t">
+        <button id="logout-btn" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 rounded-lg transition-colors">
+          <i class="fa fa-sign-out mr-2"></i>退出登录
+        </button>
       </div>
     </div>
   </div>
@@ -150,6 +278,53 @@
     const registerForm = document.getElementById('register-form');
     const togglePassword = document.getElementById('toggle-password');
     const registerPassword = document.getElementById('register-password');
+    const authButton = document.getElementById('auth-button');
+    const loginSection = document.getElementById('login-section');
+    const poetrySection = document.getElementById('poetry-section');
+    const profileLink = document.getElementById('profile-link');
+    const userAvatarContainer = document.getElementById('user-avatar-container');
+    const userAvatar = document.getElementById('user-avatar');
+    const profileModal = document.getElementById('profile-modal');
+    const closeModal = document.getElementById('close-modal');
+    const avatarUpload = document.getElementById('avatar-upload');
+    const profileAvatar = document.getElementById('profile-avatar');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userPhone = document.getElementById('user-phone');
+    
+    // 检查登录状态
+    function checkLoginStatus() {
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) {
+        const user = JSON.parse(userInfo);
+        // 显示登录后的内容
+        loginSection.classList.add('hidden');
+        poetrySection.classList.remove('hidden');
+        profileLink.classList.remove('hidden');
+        userAvatarContainer.classList.remove('hidden');
+        authButton.textContent = '退出';
+        
+        // 更新头像
+        if (user.avatar) {
+          userAvatar.src = user.avatar;
+          profileAvatar.src = user.avatar;
+        }
+        
+        // 更新手机号显示
+        if (user.phone) {
+          userPhone.textContent = user.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1****$3');
+        }
+      } else {
+        // 显示未登录状态
+        loginSection.classList.remove('hidden');
+        poetrySection.classList.add('hidden');
+        profileLink.classList.add('hidden');
+        userAvatarContainer.classList.add('hidden');
+        authButton.textContent = '登录';
+      }
+    }
+    
+    // 初始化页面状态
+    checkLoginStatus();
     
     // 切换登录/注册表单
     loginTab.addEventListener('click', () => {
@@ -217,10 +392,9 @@
       }
       errorEl.classList.add('hidden');
       
-      // 模拟发送验证码 (实际项目中调用后端接口)
+      // 模拟发送验证码
       startCountdown(document.getElementById('login-get-code'));
       console.log(`向手机号 ${phone} 发送登录验证码`);
-      // 实际项目中应调用后端接口发送短信
     });
     
     document.getElementById('login-btn').addEventListener('click', () => {
@@ -247,16 +421,24 @@
       }
       
       if (isValid) {
-        // 模拟登录请求 (实际项目中调用后端接口)
+        // 模拟登录请求
         document.getElementById('login-btn').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>登录中...';
         document.getElementById('login-btn').disabled = true;
         
         setTimeout(() => {
-          alert('登录成功！');
+          // 保存用户信息到本地存储
+          const userInfo = {
+            phone: phone,
+            avatar: 'https://picsum.photos/id/64/100/100' // 默认头像
+          };
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          
+          // 更新页面状态
+          checkLoginStatus();
+          
+          // 重置按钮状态
           document.getElementById('login-btn').innerHTML = '登录';
           document.getElementById('login-btn').disabled = false;
-          // 实际项目中登录成功后跳转页面
-          // window.location.href = '/home';
         }, 1500);
       }
     });
@@ -272,10 +454,9 @@
       }
       errorEl.classList.add('hidden');
       
-      // 模拟发送验证码 (实际项目中调用后端接口)
+      // 模拟发送验证码
       startCountdown(document.getElementById('register-get-code'));
       console.log(`向手机号 ${phone} 发送注册验证码`);
-      // 实际项目中应调用后端接口发送短信
     });
     
     document.getElementById('register-btn').addEventListener('click', () => {
@@ -312,20 +493,94 @@
       }
       
       if (isValid) {
-        // 模拟注册请求 (实际项目中调用后端接口)
+        // 模拟注册请求
         document.getElementById('register-btn').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>注册中...';
         document.getElementById('register-btn').disabled = true;
         
         setTimeout(() => {
-          alert('注册成功！');
-          // 注册成功后切换到登录表单
-          loginTab.click();
-          // 填充手机号
-          document.getElementById('login-phone').value = phone;
-          // 重置注册按钮状态
+          alert('注册成功！即将为您登录...');
+          
+          // 保存用户信息到本地存储
+          const userInfo = {
+            phone: phone,
+            avatar: 'https://picsum.photos/id/64/100/100' // 默认头像
+          };
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          
+          // 更新页面状态
+          checkLoginStatus();
+          
+          // 重置按钮状态
           document.getElementById('register-btn').innerHTML = '注册';
           document.getElementById('register-btn').disabled = false;
         }, 1500);
+      }
+    });
+    
+    // 导航栏登录/退出按钮
+    authButton.addEventListener('click', () => {
+      if (authButton.textContent === '登录') {
+        // 切换到登录表单
+        loginTab.click();
+      } else {
+        // 退出登录
+        if (confirm('确定要退出登录吗？')) {
+          localStorage.removeItem('userInfo');
+          checkLoginStatus();
+        }
+      }
+    });
+    
+    // 个人空间模态框控制
+    profileLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      profileModal.classList.remove('hidden');
+      profileModal.classList.add('flex');
+      // 防止背景滚动
+      document.body.style.overflow = 'hidden';
+    });
+    
+    closeModal.addEventListener('click', () => {
+      profileModal.classList.add('hidden');
+      profileModal.classList.remove('flex');
+      // 恢复背景滚动
+      document.body.style.overflow = 'auto';
+    });
+    
+    // 点击模态框外部关闭
+    profileModal.addEventListener('click', (e) => {
+      if (e.target === profileModal) {
+        closeModal.click();
+      }
+    });
+    
+    // 更换头像功能
+    avatarUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          // 更新头像显示
+          profileAvatar.src = event.target.result;
+          userAvatar.src = event.target.result;
+          
+          // 保存头像到本地存储
+          const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+          userInfo.avatar = event.target.result;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          
+          alert('头像更新成功！');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // 退出登录
+    logoutBtn.addEventListener('click', () => {
+      if (confirm('确定要退出登录吗？')) {
+        localStorage.removeItem('userInfo');
+        checkLoginStatus();
+        closeModal.click();
       }
     });
     
