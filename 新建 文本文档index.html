@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微信登录</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wechat: '#07C160', // 微信绿色
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .login-card {
+        backdrop-filter: blur(10px);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
+  <!-- 登录卡片 -->
+  <div class="w-full max-w-md bg-white/80 login-card rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+    <!-- 卡片头部 -->
+    <div class="p-8 text-center">
+      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-wechat/10 flex items-center justify-center">
+        <i class="fa fa-weixin text-4xl text-wechat"></i>
+      </div>
+      <h1 class="text-2xl font-bold mb-2">微信登录</h1>
+      <p class="text-gray-500">使用微信账号安全登录</p>
+    </div>
+    
+    <!-- 登录按钮 -->
+    <div class="p-6 pt-0">
+      <button id="wechat-login-btn" class="w-full bg-wechat hover:bg-wechat/90 text-white font-medium py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+        <i class="fa fa-weixin text-xl"></i>
+        <span>微信快捷登录</span>
+      </button>
+      
+      <!-- 登录说明 -->
+      <p class="text-center text-gray-400 text-sm mt-6">
+        登录即表示同意我们的<a href="#" class="text-gray-600 hover:underline">服务条款</a>和<a href="#" class="text-gray-600 hover:underline">隐私政策</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // 微信登录按钮点击事件
+    document.getElementById('wechat-login-btn').addEventListener('click', function() {
+      // 在实际应用中，这里会调用微信登录的API
+      // 以下是模拟登录过程的示例
+      this.innerHTML = '<i class="fa fa-spinner fa-spin"></i><span>正在唤起微信...</span>';
+      
+      // 模拟延迟
+      setTimeout(() => {
+        // 实际项目中，这里会跳转到微信授权页面或唤起微信客户端
+        alert('提示：在实际应用中，这里将唤起微信进行登录验证');
+        this.innerHTML = '<i class="fa fa-weixin text-xl"></i><span>微信快捷登录</span>';
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
+    
