@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>微信登录</title>
+  <title>手机号注册登录</title>
   <!-- 引入Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- 引入Font Awesome -->
@@ -14,7 +14,7 @@
       theme: {
         extend: {
           colors: {
-            wechat: '#07C160', // 微信绿色
+            primary: '#165DFF',
           },
         },
       }
@@ -26,51 +26,322 @@
       .content-auto {
         content-visibility: auto;
       }
-      .login-card {
-        backdrop-filter: blur(10px);
+      .input-focus {
+        @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
       }
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
-  <!-- 登录卡片 -->
-  <div class="w-full max-w-md bg-white/80 login-card rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
-    <!-- 卡片头部 -->
-    <div class="p-8 text-center">
-      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-wechat/10 flex items-center justify-center">
-        <i class="fa fa-weixin text-4xl text-wechat"></i>
-      </div>
-      <h1 class="text-2xl font-bold mb-2">微信登录</h1>
-      <p class="text-gray-500">使用微信账号安全登录</p>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+  <!-- 主容器 -->
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden">
+    <!-- 标题切换区 -->
+    <div class="flex border-b">
+      <button id="login-tab" class="flex-1 py-4 text-center font-medium text-primary border-b-2 border-primary">
+        登录
+      </button>
+      <button id="register-tab" class="flex-1 py-4 text-center font-medium text-gray-500 hover:text-gray-700">
+        注册
+      </button>
     </div>
     
-    <!-- 登录按钮 -->
-    <div class="p-6 pt-0">
-      <button id="wechat-login-btn" class="w-full bg-wechat hover:bg-wechat/90 text-white font-medium py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-        <i class="fa fa-weixin text-xl"></i>
-        <span>微信快捷登录</span>
+    <!-- 登录表单 -->
+    <div id="login-form" class="p-6">
+      <div class="mb-4">
+        <label for="login-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <i class="fa fa-phone"></i>
+          </span>
+          <input type="tel" id="login-phone" 
+                 class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
+                 placeholder="请输入手机号" maxlength="11">
+        </div>
+        <p id="login-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
+      </div>
+      
+      <div class="mb-6">
+        <label for="login-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <i class="fa fa-shield"></i>
+          </span>
+          <input type="text" id="login-code" 
+                 class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
+                 placeholder="请输入验证码" maxlength="6">
+          <button id="login-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
+            获取验证码
+          </button>
+        </div>
+        <p id="login-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
+      </div>
+      
+      <button id="login-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+        登录
       </button>
       
-      <!-- 登录说明 -->
-      <p class="text-center text-gray-400 text-sm mt-6">
-        登录即表示同意我们的<a href="#" class="text-gray-600 hover:underline">服务条款</a>和<a href="#" class="text-gray-600 hover:underline">隐私政策</a>
-      </p>
+      <div class="mt-4 text-center text-sm text-gray-500">
+        登录即表示同意<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a>
+      </div>
+    </div>
+    
+    <!-- 注册表单 (默认隐藏) -->
+    <div id="register-form" class="p-6 hidden">
+      <div class="mb-4">
+        <label for="register-phone" class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <i class="fa fa-phone"></i>
+          </span>
+          <input type="tel" id="register-phone" 
+                 class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus"
+                 placeholder="请输入手机号" maxlength="11">
+        </div>
+        <p id="register-phone-error" class="mt-1 text-sm text-red-500 hidden">请输入正确的手机号</p>
+      </div>
+      
+      <div class="mb-4">
+        <label for="register-code" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <i class="fa fa-shield"></i>
+          </span>
+          <input type="text" id="register-code" 
+                 class="w-full pl-10 pr-32 py-3 rounded-lg border border-gray-300 input-focus"
+                 placeholder="请输入验证码" maxlength="6">
+          <button id="register-get-code" class="absolute right-1 top-1/2 -translate-y-1/2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded text-sm transition-colors">
+            获取验证码
+          </button>
+        </div>
+        <p id="register-code-error" class="mt-1 text-sm text-red-500 hidden">请输入6位验证码</p>
+      </div>
+      
+      <div class="mb-6">
+        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">设置密码</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <i class="fa fa-lock"></i>
+          </span>
+          <input type="password" id="register-password" 
+                 class="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 input-focus"
+                 placeholder="请设置6-16位密码">
+          <button id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <i class="fa fa-eye-slash"></i>
+          </button>
+        </div>
+        <p id="register-password-error" class="mt-1 text-sm text-red-500 hidden">请设置6-16位密码</p>
+      </div>
+      
+      <button id="register-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+        注册
+      </button>
+      
+      <div class="mt-4 text-center text-sm text-gray-500">
+        注册即表示同意<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a>
+      </div>
     </div>
   </div>
 
   <script>
-    // 微信登录按钮点击事件
-    document.getElementById('wechat-login-btn').addEventListener('click', function() {
-      // 在实际应用中，这里会调用微信登录的API
-      // 以下是模拟登录过程的示例
-      this.innerHTML = '<i class="fa fa-spinner fa-spin"></i><span>正在唤起微信...</span>';
+    // DOM元素
+    const loginTab = document.getElementById('login-tab');
+    const registerTab = document.getElementById('register-tab');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const togglePassword = document.getElementById('toggle-password');
+    const registerPassword = document.getElementById('register-password');
+    
+    // 切换登录/注册表单
+    loginTab.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      loginTab.classList.add('text-primary', 'border-b-2', 'border-primary');
+      loginTab.classList.remove('text-gray-500');
+      registerTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
+      registerTab.classList.add('text-gray-500');
+    });
+    
+    registerTab.addEventListener('click', () => {
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      registerTab.classList.add('text-primary', 'border-b-2', 'border-primary');
+      registerTab.classList.remove('text-gray-500');
+      loginTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
+      loginTab.classList.add('text-gray-500');
+    });
+    
+    // 切换密码可见性
+    togglePassword.addEventListener('click', () => {
+      const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+      registerPassword.setAttribute('type', type);
+      togglePassword.innerHTML = type === 'password' ? 
+        '<i class="fa fa-eye-slash"></i>' : 
+        '<i class="fa fa-eye"></i>';
+    });
+    
+    // 手机号验证函数
+    function validatePhone(phone) {
+      const reg = /^1[3-9]\d{9}$/;
+      return reg.test(phone);
+    }
+    
+    // 验证码倒计时函数
+    function startCountdown(button) {
+      let countdown = 60;
+      button.disabled = true;
+      button.classList.remove('bg-primary/10', 'hover:bg-primary/20');
+      button.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
       
-      // 模拟延迟
-      setTimeout(() => {
-        // 实际项目中，这里会跳转到微信授权页面或唤起微信客户端
-        alert('提示：在实际应用中，这里将唤起微信进行登录验证');
-        this.innerHTML = '<i class="fa fa-weixin text-xl"></i><span>微信快捷登录</span>';
-      }, 2000);
+      const timer = setInterval(() => {
+        if (countdown <= 0) {
+          clearInterval(timer);
+          button.innerHTML = '获取验证码';
+          button.disabled = false;
+          button.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+          button.classList.add('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+          return;
+        }
+        button.innerHTML = `${countdown}s后重发`;
+        countdown--;
+      }, 1000);
+    }
+    
+    // 登录表单逻辑
+    document.getElementById('login-get-code').addEventListener('click', () => {
+      const phone = document.getElementById('login-phone').value;
+      const errorEl = document.getElementById('login-phone-error');
+      
+      if (!validatePhone(phone)) {
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      errorEl.classList.add('hidden');
+      
+      // 模拟发送验证码 (实际项目中调用后端接口)
+      startCountdown(document.getElementById('login-get-code'));
+      console.log(`向手机号 ${phone} 发送登录验证码`);
+      // 实际项目中应调用后端接口发送短信
+    });
+    
+    document.getElementById('login-btn').addEventListener('click', () => {
+      const phone = document.getElementById('login-phone').value;
+      const code = document.getElementById('login-code').value;
+      const phoneError = document.getElementById('login-phone-error');
+      const codeError = document.getElementById('login-code-error');
+      let isValid = true;
+      
+      // 验证手机号
+      if (!validatePhone(phone)) {
+        phoneError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        phoneError.classList.add('hidden');
+      }
+      
+      // 验证验证码
+      if (code.length !== 6) {
+        codeError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        codeError.classList.add('hidden');
+      }
+      
+      if (isValid) {
+        // 模拟登录请求 (实际项目中调用后端接口)
+        document.getElementById('login-btn').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>登录中...';
+        document.getElementById('login-btn').disabled = true;
+        
+        setTimeout(() => {
+          alert('登录成功！');
+          document.getElementById('login-btn').innerHTML = '登录';
+          document.getElementById('login-btn').disabled = false;
+          // 实际项目中登录成功后跳转页面
+          // window.location.href = '/home';
+        }, 1500);
+      }
+    });
+    
+    // 注册表单逻辑
+    document.getElementById('register-get-code').addEventListener('click', () => {
+      const phone = document.getElementById('register-phone').value;
+      const errorEl = document.getElementById('register-phone-error');
+      
+      if (!validatePhone(phone)) {
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      errorEl.classList.add('hidden');
+      
+      // 模拟发送验证码 (实际项目中调用后端接口)
+      startCountdown(document.getElementById('register-get-code'));
+      console.log(`向手机号 ${phone} 发送注册验证码`);
+      // 实际项目中应调用后端接口发送短信
+    });
+    
+    document.getElementById('register-btn').addEventListener('click', () => {
+      const phone = document.getElementById('register-phone').value;
+      const code = document.getElementById('register-code').value;
+      const password = document.getElementById('register-password').value;
+      const phoneError = document.getElementById('register-phone-error');
+      const codeError = document.getElementById('register-code-error');
+      const passwordError = document.getElementById('register-password-error');
+      let isValid = true;
+      
+      // 验证手机号
+      if (!validatePhone(phone)) {
+        phoneError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        phoneError.classList.add('hidden');
+      }
+      
+      // 验证验证码
+      if (code.length !== 6) {
+        codeError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        codeError.classList.add('hidden');
+      }
+      
+      // 验证密码
+      if (password.length < 6 || password.length > 16) {
+        passwordError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        passwordError.classList.add('hidden');
+      }
+      
+      if (isValid) {
+        // 模拟注册请求 (实际项目中调用后端接口)
+        document.getElementById('register-btn').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>注册中...';
+        document.getElementById('register-btn').disabled = true;
+        
+        setTimeout(() => {
+          alert('注册成功！');
+          // 注册成功后切换到登录表单
+          loginTab.click();
+          // 填充手机号
+          document.getElementById('login-phone').value = phone;
+          // 重置注册按钮状态
+          document.getElementById('register-btn').innerHTML = '注册';
+          document.getElementById('register-btn').disabled = false;
+        }, 1500);
+      }
+    });
+    
+    // 输入框实时验证
+    document.getElementById('login-phone').addEventListener('input', function() {
+      const errorEl = document.getElementById('login-phone-error');
+      if (validatePhone(this.value)) {
+        errorEl.classList.add('hidden');
+      }
+    });
+    
+    document.getElementById('register-phone').addEventListener('input', function() {
+      const errorEl = document.getElementById('register-phone-error');
+      if (validatePhone(this.value)) {
+        errorEl.classList.add('hidden');
+      }
     });
   </script>
 </body>
